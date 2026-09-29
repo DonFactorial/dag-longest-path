@@ -1,7 +1,6 @@
 import networkx as nx
 import plotly.graph_objects as go
 from plotly.offline import init_notebook_mode, iplot
-from pathlib import Path
 
 # Generating node data
 # For ease of programming, I'm indexing nodes starting from k=0 instead of 1
@@ -57,7 +56,8 @@ def find_longest_path(DG, topo_arg_sorted):
     return max(dp, key=lambda arr: len(arr))
 
 longest_path = find_longest_path(DG, topo_sorted)
-print(longest_path)
+longest_path_fixed_index = [n+1 for n in longest_path]
+print(longest_path_fixed_index)
 print(len(longest_path))
 
 
@@ -104,7 +104,7 @@ for n in DG.nodes():
 node_trace = go.Scattergl(x=node_x, y=node_y, mode="markers", hoverinfo="text",
                           marker=dict(showscale=False, 
                                       color=color_list, size=7, line_width=0.5),
-                          text=[str(n) for n in DG.nodes()])
+                          text=[str(n+1) for n in DG.nodes()])
 
 fig = go.Figure(data=[edge_trace, node_trace],
                 layout=go.Layout(
@@ -117,4 +117,4 @@ fig = go.Figure(data=[edge_trace, node_trace],
                     yaxis=dict(showgrid=False, zeroline=False, visible=False)
                 ))
 
-fig.write_html(Path.cwd() / "digraph.html")
+fig.write_html("digraph.html")
