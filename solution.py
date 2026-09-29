@@ -74,24 +74,16 @@ print(check_path(DG, longest_path))
 
 
 # Visualize with plotly
-pos = nx.spring_layout(DG)
 longest_path_set = set(longest_path)
 
-# Drawing only the edges used in the optimal path (otherwise you just get a cloud)
-path_edges = [(longest_path[i], longest_path[i+1]) for i in range(len(longest_path)-1)]
-edge_x = []
-edge_y = []
-for u, v in path_edges:
-    edge_x += [pos[u][0], pos[v][0], None]
-    edge_y += [pos[u][1], pos[v][1], None]
-    
-edge_trace = go.Scattergl(x=edge_x, y=edge_y, line=dict(width=1, color="#888"),
-                          hoverinfo="none", mode="lines")
+x_pos = {}
+y_pos = {}
+
+for idx, dic in topo_sorted:
+    x_pos[idx] = dic["t"]
+    y_pos[idx] = dic["y"]
 
 # Draw all nodes, but give special colors to the nodes in the optimal path
-node_x = [pos[n][0] for n in DG.nodes()]
-node_y = [pos[n][1] for n in DG.nodes()]
-
 color_list = []
 for n in DG.nodes():
     if n == longest_path[0] or n == longest_path[-1]:
@@ -101,10 +93,22 @@ for n in DG.nodes():
     else:
         color_list.append("blue")
 
-node_trace = go.Scattergl(x=node_x, y=node_y, mode="markers", hoverinfo="text",
+node_trace = go.Scattergl(x=[x_pos[n] for n in DG.nodes()], y=[y_pos[n] for n in DG.nodes()], 
+                          mode="markers", hoverinfo="text",
                           marker=dict(showscale=False, 
                                       color=color_list, size=7, line_width=0.5),
                           text=[str(n+1) for n in DG.nodes()])
+
+# Drawing only the edges used in the optimal path (otherwise you just get a cloud)
+path_edges = [(longest_path[i], longest_path[i+1]) for i in range(len(longest_path)-1)]
+edge_x = []
+edge_y = []
+for u, v in path_edges:
+    edge_x += [x_pos[u], x_pos[v], None]
+    edge_y += [y_pos[u], y_pos[v], None]
+    
+edge_trace = go.Scattergl(x=edge_x, y=edge_y, line=dict(width=1, color="#888"),
+                          hoverinfo="none", mode="lines")
 
 fig = go.Figure(data=[edge_trace, node_trace],
                 layout=go.Layout(
